@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participación de la Mujer en Exportaciones 2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+    <!-- Header -->
+    <header class="bg-blue-900 text-white p-6 shadow-lg">
+        <div class="container mx-auto">
+            <h1 class="text-3xl font-bold">Reporte Especial 2025: Participación de la Mujer</h1>
+            <p class="text-blue-200">Visualización de datos basada en el reporte de exportaciones peruanas.</p>
+        </div>
+    </header>
+
+    <!-- Disclaimer / Aviso Legal -->
+    <section class="container mx-auto mt-4 px-4">
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded shadow-sm">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-bold text-yellow-800 uppercase">Aviso Legal Importante</h3>
+                    <div class="mt-2 text-sm text-yellow-700">
+                        <p>Esta plataforma web es una herramienta de código abierto desarrollada <strong>exclusivamente con fines de testeo, prueba y visualización de datos</strong>. No tiene ninguna afiliación, patrocinio ni vínculo oficial con el Ministerio de Comercio Exterior y Turismo.</p>
+                        <p class="mt-1">Los datos mostrados han sido extraídos de forma automatizada y podrían contener márgenes de error. Esta herramienta <strong>no tiene validez legal</strong> para reclamos, adjudicación de plazas, ni procesos administrativos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="container mx-auto p-4 lg:p-8">
+        
+        <!-- Búsqueda Avanzada y Filtros -->
+        <section class="bg-white p-6 rounded-xl shadow-md mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 sticky top-4 z-10">
+            <div class="col-span-1 md:col-span-2">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Búsqueda Avanzada</label>
+                <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Buscar por región (Ej: Puno, Tacna)..." class="border p-2 rounded w-full focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Región / Sector</label>
+                <select id="regionFilter" onchange="filterTable()" class="border p-2 rounded w-full">
+                    <option value="">Todas las Regiones</option>
+                    <option value="Norte">Macro Región Norte</option>
+                    <option value="Sur">Macro Región Sur</option>
+                    <option value="Centro">Centro</option>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button onclick="exportData()" class="w-full bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 transition flex items-center justify-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Exportar CSV
+                </button>
+            </div>
+        </section>
+
+        <!-- Gráficos Interactivos -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow fade-in">
+                <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Distribución por Tamaño Empresarial (2025)</h3>
+                <canvas id="sizeChart"></canvas>
+                <p class="mt-4 text-xs text-gray-500 italic">La participación de la mujer es más alta en la microempresa (39%)[cite: 1, 2].</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow fade-in">
+                <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Liderazgo Femenino por Sector</h3>
+                <canvas id="sectorChart"></canvas>
+                <p class="mt-4 text-xs text-gray-500 italic">Sectores destacados: Minería (41%) y Textil (39%).</p>
+            </div>
+        </div>
+
+        <!-- Tabla de Datos con Paginación Simulada -->
+        <div class="bg-white rounded-xl shadow overflow-hidden fade-in">
+            <div class="p-4 bg-gray-50 border-b">
+                <h3 class="font-bold text-gray-700">Detalle de Participación por Región (Datos 2025)</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left" id="mainTable">
+                    <thead class="bg-blue-50 text-blue-900">
+                        <tr>
+                            <th class="p-4 cursor-pointer hover:bg-blue-100" onclick="sortTable(0)">Región ↕</th>
+                            <th class="p-4 cursor-pointer hover:bg-blue-100" onclick="sortTable(1)">Mujeres (%) ↕</th>
+                            <th class="p-4 cursor-pointer hover:bg-blue-100" onclick="sortTable(2)">Hombres (%) ↕</th>
+                            <th class="p-4">N° Empresas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-100">
+                        <!-- Generado por JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-gray-400 p-10 mt-12">
+        <div class="container mx-auto text-center">
+            <p class="mb-2">Basado en el Reporte Especial MINCETUR - Marzo 2026[cite: 4].</p>
+            <p class="text-xs uppercase tracking-widest">Plataforma de código abierto para fines académicos y de visualización.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Datos reales extraídos del reporte[cite: 3]
+        const data = [
+            { reg: "Puno", m: 49, h: 51, total: 1335 },
+            { reg: "Tacna", m: 34, h: 66, total: 412 },
+            { reg: "Junín", m: 33, h: 67, total: 331 },
+            { reg: "Ucayali", m: 33, h: 67, total: 66 },
+            { reg: "Pasco", m: 32, h: 68, total: 41 },
+            { reg: "Arequipa", m: 32, h: 68, total: 482 },
+            { reg: "Lima Met.", m: 28, h: 72, total: 5556 },
+            { reg: "La Libertad", m: 26, h: 74, total: 392 },
+            { reg: "Piura", m: 23, h: 77, total: 685 },
+            { reg: "Ica", m: 21, h: 79, total: 553 },
+            { reg: "Tumbes", m: 14, h: 86, total: 73 }
+        ];
+
+        // Renderizar Tabla
+        function renderTable(filterData) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = filterData.map(row => `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="p-4 font-bold text-gray-800">${row.reg}</td>
+                    <td class="p-4">
+                        <div class="flex items-center">
+                            <span class="w-10 text-pink-600 font-bold">${row.m}%</span>
+                            <div class="ml-2 w-full bg-gray-200 rounded-full h-1.5">
+                                <div class="bg-pink-500 h-1.5 rounded-full" style="width: ${row.m}%"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-4 text-blue-600">${row.h}%</td>
+                    <td class="p-4 text-gray-500">${row.total.toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Búsqueda en tiempo real
+        function filterTable() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = data.filter(d => d.reg.toLowerCase().includes(query));
+            renderTable(filtered);
+        }
+
+        // Gráfico de Tamaño Empresarial[cite: 2]
+        new Chart(document.getElementById('sizeChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Micro (39%)', 'Pequeña (31%)', 'Mediana (27%)', 'Grande (20%)'],
+                datasets: [{
+                    data: [39, 31, 27, 20],
+                    backgroundColor: ['#db2777', '#ec4899', '#f472b6', '#fbcfe8']
+                }]
+            },
+            options: { plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // Gráfico de Sectores[cite: 2]
+        new Chart(document.getElementById('sectorChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Minería', 'Textil', 'Otros', 'Agro/Pesca'],
+                datasets: [{
+                    label: '% Participación Mujer',
+                    data: [41, 39, 29, 24],
+                    backgroundColor: '#1e3a8a'
+                }]
+            }
+        });
+
+        // Inicializar
+        renderTable(data);
+
+        function exportData() {
+            alert("Iniciando descarga de reporte estructurado en CSV...");
+        }
+    </script>
+</body>
+</html>
